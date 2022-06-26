@@ -28,14 +28,7 @@ class _Popen(forking.Popen):
 class Process(multiprocessing.Process):
     _Popen = _Popen
 
-#webpage links and vars
 #start_time = time.time()
-pages = [
-    'https://www.raskakcija.lt/aibe-akciju-leidinys.htm',
-    'https://www.raskakcija.lt/iki-akciju-leidinys.htm',
-    'https://www.raskakcija.lt/maxima-akciju-leidinys.htm',
-    'https://www.raskakcija.lt/norfa-akciju-leidinys.htm'
-]
 api = tesserocr.PyTessBaseAPI(os.path.dirname(os.path.realpath(__file__)) + "\\tessdata", lang='lit')
 #store checking function
 def checkStore(url):
@@ -52,73 +45,40 @@ def checkStore(url):
         api.SetImage(img)
         text = api.GetUTF8Text()
         string = str(text)
-        string = string.replace('\n', '').replace('-', '')
-        val = string.find("MONSTER")
+        string = string.replace('\n', '').replace('-', '').lower()
+        val = string.find("cido") #find occurences with specified item
         if val > -1:
-            print(imgs[j])
-            return True
+            return imgs[j]
     return False
 #main
 num_of_threads = 4
 os.system("")
 if __name__ ==  '__main__':
+    pages = [
+    'https://www.raskakcija.lt/aibe-akciju-leidinys.htm',
+    'https://www.raskakcija.lt/iki-akciju-leidinys.htm',
+    'https://www.raskakcija.lt/maxima-akciju-leidinys.htm',
+    'https://www.raskakcija.lt/norfa-akciju-leidinys.htm'
+    ]
     multiprocessing.freeze_support()
     with ProcessPool(num_of_threads) as pool:
         results = pool.map(checkStore, pages)
         if results[0]:
-            print("\033[92mAIBĖ - TAIP")
+            print("\033[92mAIBĖ - TAIP - " + results[0])
         else:
             print("\033[91mAIBĖ - NE")
         if results[1]:
-            print("\033[92mIKI - TAIP")
+            print("\033[92mIKI - TAIP - " + results[1])
         else:
             print("\033[91mIKI - NE")
         if results[2]:
-            print("\033[92mMAXIMA - TAIP")
+            print("\033[92mMAXIMA - TAIP - " + results[2])
         else:
             print("\033[91mMAXIMA - NE")
         if results[3]:
-            print("\033[92mNORFA - TAIP")
+            print("\033[92mNORFA - TAIP - " + results[3])
         else:
             print("\033[91mNORFA - NE")
         print("\033[0m")
         #print("--- %s seconds ---" % (time.time() - start_time))
         os.system('pause')
-        
-'''
-for i in range(0, 4):
-    quote_page = pages[i]
-    page = urllib.request.urlopen(quote_page)
-
-    soup = BeautifulSoup(page, 'html.parser')
-
-    divs = soup.findAll(class_= 'plati')
-    imgs = list()   
-    for div in divs:
-        string = str(div)
-        imgs.append(string.split("\"")[7])
-    for j in range(0, len(imgs)):
-        response = requests.get(imgs[j])
-        img = Image.open(io.BytesIO(response.content))
-        pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
-        text = pytesseract.image_to_string(img, lang="lit")
-        string = str(text)
-        if string.find("MONSTER") > -1:
-            found[i] = True
-            break
-if found[0]:
-    print("AIBĖ - TAIP")
-else:
-    print("AIBĖ - NE")
-if found[1]:
-    print("IKI - TAIP")
-else:
-    print("IKI - NE")
-if found[2]:
-    print("MAXIMA - TAIP")
-else:
-    print("MAXIMA - NE")
-if found[3]:
-    print("NORFA - TAIP")
-else:
-    print("NORFA - NE")'''
