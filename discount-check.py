@@ -3,12 +3,13 @@ import urllib.request
 import requests
 from PIL import Image
 import io
-import tesserocr
+from tesserocr import PyTessBaseAPI
 import os
 import sys
 from multiprocessing import Pool as ProcessPool
 import multiprocessing.popen_spawn_win32 as forking 
 import multiprocessing
+from functools import partial
 #import time
 
 #windows multithreading bullshit
@@ -29,9 +30,9 @@ class Process(multiprocessing.Process):
     _Popen = _Popen
 
 #start_time = time.time()
-api = tesserocr.PyTessBaseAPI(os.path.dirname(os.path.realpath(__file__)) + "\\tessdata", lang='lit')
+api = PyTessBaseAPI(os.path.dirname(os.path.realpath(__file__)) + "\\tessdata", lang='lit')
 #store checking function
-def checkStore(url):
+def checkStore(url, prompt):
     page = urllib.request.urlopen(url)
     soup = BeautifulSoup(page, 'html.parser')
     divs = soup.findAll(class_= 'plati')
@@ -46,7 +47,7 @@ def checkStore(url):
         text = api.GetUTF8Text()
         string = str(text)
         string = string.replace('\n', '').replace('-', '').lower()
-        val = string.find("cido") #find occurences with specified item
+        val = string.find(prompt) #find occurences with specified item
         if val > -1:
             return imgs[j]
     return False
@@ -54,6 +55,9 @@ def checkStore(url):
 num_of_threads = 4
 os.system("")
 if __name__ ==  '__main__':
+    print("Įveskite prekės pavadinimą:")
+    prompt = input()
+    prompt = prompt.lower()
     pages = [
     'https://www.raskakcija.lt/aibe-akciju-leidinys.htm',
     'https://www.raskakcija.lt/iki-akciju-leidinys.htm',
@@ -62,7 +66,7 @@ if __name__ ==  '__main__':
     ]
     multiprocessing.freeze_support()
     with ProcessPool(num_of_threads) as pool:
-        results = pool.map(checkStore, pages)
+        results = pool.map(partial(checkStore, prompt=prompt), pages)
         if results[0]:
             print("\033[92mAIBĖ - TAIP - " + results[0])
         else:
