@@ -55,6 +55,7 @@ def checkStore(url, prompt):
 num_of_threads = 4
 os.system("")
 if __name__ ==  '__main__':
+    multiprocessing.freeze_support()
     print("Įveskite prekės pavadinimą:")
     prompt = input()
     prompt = prompt.lower()
